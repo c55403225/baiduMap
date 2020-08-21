@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
+    <!-- <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.62/dist/mapvgl.min.js"></script>  -->
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=BTDFGi2hsmy4jkytvgXipySR2RQAnYfW"></script>
+    <title>百度地图动画</title>
+    <style type="text/css">  
+        html{height:100%}    
+        body{height:100%;margin:0px;padding:0px}    
+        #container{height:100%}    
+    </style> 
+</head>
+<body>
+    <div id="container"></div> 
+    <script>
+        // const map = document.getElementById('container');
+        var map = new BMapGL.Map("container");
+        var point = new BMapGL.Point(118.5,27.5);
+        map.centerAndZoom(point, 10);  
+        //使用鼠标滚轮缩放地图
+        map.enableScrollWheelZoom(true);
+        // map.setMapType(BMAP_EARTH_MAP);      
+    </script>
+    
+</body>
+</html>

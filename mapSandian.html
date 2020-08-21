@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />  
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=BTDFGi2hsmy4jkytvgXipySR2RQAnYfW"></script>
+    <script src='https://mapv.baidu.com/gl/examples/static/common.js'></script>
+    <script src="https://mapv.baidu.com/build/mapv.min.js"></script>
+    <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.67/dist/mapvgl.min.js"></script>
+    <title>百度地图散点图</title>
+    <style type="text/css">  
+        html{height:100%}    
+        body{height:100%;margin:0px;padding:0px}    
+        #map_container{height:100%;width: 100%;}    
+    </style> 
+</head>
+<body>
+    <div id="map_container"></div> 
+    <script>
+        // const map = document.getElementById('container');
+        // var map = new BMapGL.Map("container");
+        // var point = new BMapGL.Point(121.47939,31.237905);
+        // map.centerAndZoom(point, 10);  
+        //使用鼠标滚轮缩放地图
+        // map.enableScrollWheelZoom(true);
+
+        var map = initBMap();
+        var data = initData();
+        setData(map,data);
+       
+        //初始化百度地图
+        function initBMap () {
+            var cityCenter = mapv.utilCityCenter.getCenterByCityName('南京')
+            var map = initMap({
+            tilt:0,
+            center:[cityCenter.lng,cityCenter.lat],
+            zoom:10,
+            style:snowStyle
+        })
+        return map;
+        }
+        //展示数据源
+        //创建函数调用完成展示数据源
+        function initData() {
+            var data =[];
+            //准备模拟点700个
+            var random = 700;
+            var city = ['北京', '天津', '上海', '重庆', '石家庄', '太原', '呼和浩特', '哈尔滨',
+            '长春', '沈阳', '济南', '南京', '合肥', '杭州', '南昌', '福州', '郑州',
+            '武汉', '长沙', '广州', '南宁', '西安', '银川', '兰州', '西宁', '乌鲁木齐',
+            '成都', '贵阳', '昆明', '拉萨', '海口'];
+          
+            while(random--){
+                var cityCenter = mapv.utilCityCenter.getCenterByCityName(city[parseInt(Math.random() * city.length)]);
+                data.push({
+                geometry:{
+                    type:'Point',
+                    //绘制的坐标点
+                    coordinates:[cityCenter.lng - 2 + Math.random() * 4,cityCenter.lat - 2 + Math.random() * 4]
+                },
+                //加数据properties
+                properties:{
+                    sales:Math.random() * 100
+                }
+            })   
+            }    
+            // data = data.filter(_=>_.properties.sales > 90) 
+            // console.log(data);
+            return data;
+        }
+        
+       function setData (map,data) {
+            //绘制数据源
+            //1. 生成 mapvgl 视图 View
+            var view = new mapvgl.View({ map })//传入map对象进行关联
+            //2.初始化Intensity对象(主要是控制点的大小和颜色)
+            var intensity = new mapvgl.Intensity({
+                min:0,//当前数据最小值
+                max:100,//当前数据最大值
+                minSize:5,
+                maxSize:30,  //希望最大像素
+                //颜色定制
+                gradient:{  //从0-1可以插入数据由大到小的渐变颜色
+                    0:'rgba(25,66,102,0.8)',
+                    0.3:'rgba(145,102,129,0.8)',
+                    0.7:'rgba(210,131,137,0.8)',
+                    1:'rgba(248,177,149,0.8)'
+                } 
+
+            })
+            //3. 初始化mapvgl 的 pointLayer 对象
+            var pointLayer = new mapvgl.PointLayer({
+                size:function(data){
+                    // console.log(data)
+                    return intensity.getSize(data.properties.sales)
+                },
+                color:function(data){
+                    // console.log(data) 
+                    return intensity.getColor(data.properties.sales)
+                }
+            })
+            //4. 将 point 对象加入 View 中
+            view.addLayer(pointLayer)
+            //5. 将 data 与 Point 进行绑定 
+            pointLayer.setData(data)
+       }
+    </script>
+    
+</body>
+</html>
