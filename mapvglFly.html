@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />  
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=BTDFGi2hsmy4jkytvgXipySR2RQAnYfW"></script>
+    <script src='https://mapv.baidu.com/gl/examples/static/common.js'></script>
+    <script src="https://mapv.baidu.com/build/mapv.min.js"></script>
+    <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.67/dist/mapvgl.min.js"></script> 
+    <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.67/dist/mapvgl.threelayers.min.js"></script>
+    <title>百度地图炫酷飞行动画</title>
+    <style type="text/css">  
+        html{height:100%}    
+        body{height:100%;margin:0px;padding:0px}    
+        #map_container{height:100%;width: 100%;}    
+    </style> 
+</head>
+<body>
+    <div id="map_container"></div> 
+    <script>
+      
+
+        var map = initBMap();
+        var data = initData();
+        setData(map,data);
+       
+        //初始化百度地图
+        function initBMap () {
+            var cityCenter = mapv.utilCityCenter.getCenterByCityName('北京')
+            var map = initMap({
+            tilt:0,
+            center:[cityCenter.lng,cityCenter.lat],
+            zoom:6,
+            style:purpleStyle
+        })
+        return map;
+        }
+        //展示数据源
+        //创建函数调用完成展示数据源
+        function initData() {
+            var data =[];
+            var city = ['北京', '天津', '上海', '重庆', '石家庄', '太原', '呼和浩特', '哈尔滨',
+            '长春', '沈阳', '济南', '南京', '合肥', '杭州', '南昌', '福州', '郑州',
+            '武汉', '长沙', '广州', '南宁', '西安', '银川', '兰州', '西宁', '乌鲁木齐',
+            '成都', '贵阳', '昆明', '拉萨', '海口'];
+            var MapStart = mapv.utilCityCenter.getCenterByCityName('北京');
+
+            //使用边绑定算法
+            var nodeData = [{
+                x:MapStart.lng,
+                y:MapStart.lat
+            }];//各个点
+            var endDota = [{
+                source:0,//起始点  --> 0表示0号元素(也就是第一个元素)
+                target:0//目标点  -->0表示第一个元素
+            }];//各个边
+            var randomData = 500;
+           
+            for(var i = 0;i < randomData; i ++){
+                var Mapend =  mapv.utilCityCenter.getCenterByCityName(city[parseInt(city.length * Math.random())]);
+                nodeData.push({
+                    x:Mapend.lng - 5 + Math.random() *10,
+                    y:Mapend.lat - 5 + Math.random() *10
+                });
+                endDota.push({
+                    source:i + 1,
+                    target:0
+                })
+                
+            }
+            // console.log(nodeData,endDota)
+            var bundling = mapv.utilForceEdgeBundling().nodes(nodeData).edges(endDota);
+            var results = bundling();
+            console.log(results)
+            for(var i = 0;i < results.length; i++){
+                var Line = results[i];
+                var coordinates = [];
+                for(var j = 0;j < Line.length;j++){
+                    console.log(j)
+                    coordinates.push([Line[j].x,Line[j].y])
+                }
+                data.push({
+                    geometry:{
+                        type:'LineString',
+                        coordinates
+                    }
+                })
+            }
+        //     data.push({
+        //         geometry:{
+        //             type:'LineString',
+        //             coordinates:curveData 
+        //         }
+        //         })
+        //    console.log(data)
+            return data;
+                }
+           
+        //绘制数据源 
+       function setData (map,data) {
+           //1.初始化图层
+           var view = new mapvgl.View({ map });
+            //初始化LineLayer
+            var LineLayer = new mapvgl.LineLayer({
+                color:'rgba(55,50,250,0.5)',
+                blend:'lighter'
+            });
+            view.addLayer(LineLayer);
+            LineLayer.setData(data);
+
+            var linePointLayer = new mapvgl.LinePointLayer({
+            size: 6,
+            speed: 8,
+            color: 'rgba(255, 255, 0, 0.6)',
+            animationType: mapvgl.LinePointLayer.ANIMATION_TYPE_SMOOTH,
+            shapeType: mapvgl.LinePointLayer.SHAPE_TYPE_CIRCLE,
+            blend: 'lighter'
+            });
+            view.addLayer(linePointLayer);
+            linePointLayer.setData(data);
+       }
+    </script>
+    
+</body>
+</html>
